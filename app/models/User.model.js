@@ -31,11 +31,8 @@ export const User = sequelize.define('user', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    last_login: {
-        type: DataTypes.DATE
-    },
-    status: {
-        type: DataTypes.ENUM('active', 'inactive'),
-        defaultValue: 'active'
+    confirmed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });

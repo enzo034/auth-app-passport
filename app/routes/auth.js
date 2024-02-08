@@ -1,6 +1,7 @@
 import { signup, signin, logout, dashboard } from '../controllers/authController.js';
 import { Router } from 'express'
 import passport from 'passport';
+import { isLoggedIn } from '../middlewares/auth.middlewares.js';
 
 const router = Router();
 
@@ -22,13 +23,5 @@ router.post('/signin', passport.authenticate('local-signin', {
     failureRedirect: '/signin'
 }
 ));
-
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated())
-
-        return next();
-
-    res.redirect('/signin');
-}
 
 export default router;

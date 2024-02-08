@@ -1,7 +1,8 @@
-import bcrypt from 'bcryptjs';
-import { User } from '../../models/user.js';
+import { User } from '../../models/User.model.js';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import { isValidPassword, generateHash } from '../../utils/passport-password.js';
+
 
 export default () => {
 
@@ -28,9 +29,6 @@ export default () => {
             passReqToCallback: true // allows us to pass back the entire request to the callback
         },
         async (req, email, password, done) => {
-            var generateHash = (password) => {
-                return bcrypt.hashSync(password, genSaltSync(8), null);
-            };
             const user = await User.findOne({
                 where: {
                     email: email
@@ -41,7 +39,7 @@ export default () => {
                     message: 'That email is already taken'
                 });
             } else {
-                var userPassword = bcrypt.hashSync(password, 10);
+                var userPassword = generateHash(password);
                 var data =
                 {
                     email: email,
@@ -71,9 +69,6 @@ export default () => {
         },
         async (req, email, password, done) => {
             try {
-                var isValidPassword = (userpass, password) => {
-                    return bcrypt.compareSync(password, userpass);
-                }
                 const user = await User.findOne({
                     where: {
                         email: email

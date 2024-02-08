@@ -1,7 +1,8 @@
 import passport from 'passport';
 import session from 'express-session';
 import { engine } from 'express-handlebars';
-import { User } from './app/models/user.js';
+import { User } from './app/models/User.model.js';
+import { RecoveryToken } from './app/models/RecoveryToken.model.js';
 import authRouter from './app/routes/auth.js'
 import express, { urlencoded, json } from 'express';
 var app = express();
@@ -39,9 +40,10 @@ import passportConfig from './app/config/passport/passport.js'
 passportConfig();
 
 //Sync Database 
-async function dbConnect(){
+async function dbConnect() {
     try {
         await User.sync();
+        await RecoveryToken.sync();
     } catch (error) {
         console.log("Unable to connect to the db : ", error);
     }
