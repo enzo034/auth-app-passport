@@ -1,15 +1,14 @@
 import { CURRENT_URL, NM_EMAIL } from "../config/config.js";
-import { createVerificationToken, verifyEmailToken } from './createAndVerifyTokens.js'
+import { createVerificationToken } from './createAndVerifyTokens.js'
 import { transporter } from './transporterNodeMailer.js';
 
 export const sendEmailConfirmation = async (user) => {
     try {
-        console.log("SendEmailConfirmation");
-        const recoveryToken = await createVerificationToken(user.userId);
+        const recoveryToken = await createVerificationToken(user.id);
 
-        if(!recoveryToken) return false;
+        if (!recoveryToken) return false;
 
-        const confirmationLink = `${CURRENT_URL}/resetpassword/${recoveryToken}`;
+        const confirmationLink = `${CURRENT_URL}/confirmemail/${recoveryToken.dataValues.token}`;
 
         const mailOptions = {
             from: NM_EMAIL,

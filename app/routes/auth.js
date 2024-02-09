@@ -1,4 +1,4 @@
-import { signup, signin, logout, dashboard } from '../controllers/authController.js';
+import { signup, signin, logout, dashboard, confirmEmail } from '../controllers/authController.js';
 import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/auth.middlewares.js';
@@ -23,5 +23,7 @@ router.post('/signin', passport.authenticate('local-signin', {
     failureRedirect: '/signin'
 }
 ));
+
+router.get('/confirmemail/:token', confirmEmail);
 
 export default router;

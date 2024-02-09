@@ -2,7 +2,7 @@ import { User } from '../../models/User.model.js';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { isValidPassword, generateHash } from '../../utils/passport-password.js';
-
+import { sendEmailConfirmation } from '../../utils/emailVerification.js';
 
 export default () => {
 
@@ -48,8 +48,10 @@ export default () => {
                     lastname: req.body.lastname
                 };
                 const newUser = await User.create(data);
+                
+                const success = sendEmailConfirmation(newUser);
 
-                if (!newUser) {
+                if (!newUser || !success) {
                     return done(null, false);
                 }
                 if (newUser) {

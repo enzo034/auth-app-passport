@@ -1,17 +1,45 @@
-export function signup (req, res) {
+import { User } from "../models/User.model.js";
+import { RecoveryToken } from "../models/RecoveryToken.model.js";
+import { verifyEmailToken } from "../utils/createAndVerifyTokens";
+
+export const signup = (req, res) => {
     res.render('signup');
 }
 
-export function signin(req, res) {
+export const signin = (req, res) => {
     res.render('signin');
 }
 
-export function dashboard(req, res) {
+export const dashboard = (req, res) => {
     res.render('dashboard');
 }
 
-export function logout(req, res) {
+export const logout = (req, res) => {
     req.session.destroy(function(err) {
         res.redirect('/');
     });
+}
+
+export const confirmEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        const confirmationToken = verifyEmailToken(token);
+
+        if (!confirmationToken) {
+            return res.status(400).json({ message: 'Enlace de confirmación inválido o vencido' });
+        }
+
+        await User.update({ confirmed: true }, {
+            where: { id: confirmationToken.userId }
+        })
+
+        await RecoveryToken.destroy({
+            where: { token: token }
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message: "Error en el servidor", error});
+    }
 }

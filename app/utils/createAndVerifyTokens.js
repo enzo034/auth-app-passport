@@ -40,13 +40,13 @@ export const verifyEmailToken = async (token) => {
 
         if (emailToken && emailToken.expiresAt > new Date()) {
             console.log("El token es válido");
-            return true;
+            return emailToken;
         } else {
             console.log("Token no encontrado, inválido o expirado");
-            return false;
+            return null;
         }
     } catch (error) {
         console.log("Error al verificar el token : ", error);
-        return false;
+        return null;
     }
 }
