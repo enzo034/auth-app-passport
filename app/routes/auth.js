@@ -24,6 +24,15 @@ router.post('/signin', passport.authenticate('local-signin', {
 }
 ));
 
+router.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/error' }),
+    (req, res) => {
+        res.redirect('/dashboard');
+    });
+
 router.get('/confirmemail/:token', confirmEmail);
 
 export default router;

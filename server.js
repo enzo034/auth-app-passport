@@ -51,7 +51,9 @@ async function dbConnect() {
 dbConnect();
 
 app.get('/', function (req, res) {
-    res.send('Welcome to Passport with Sequelize');
+    res.send(`Welcome to Passport with Sequelize 
+                <a href="/signup">Sign up</a>
+                <a href="/signin">Sign in</a>`);
 });
 
 app.listen(3000, function (err) {

@@ -3,6 +3,8 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { isValidPassword, generateHash } from '../../utils/passport-password.js';
 import { sendEmailConfirmation } from '../../utils/emailVerification.js';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '../config.js';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 export default () => {
 
@@ -48,7 +50,7 @@ export default () => {
                     lastname: req.body.lastname
                 };
                 const newUser = await User.create(data);
-                
+
                 const success = sendEmailConfirmation(newUser);
 
                 if (!newUser || !success) {
@@ -93,6 +95,35 @@ export default () => {
                 return done(null, false, {
                     message: 'Something went wrong with your Signin'
                 });
+            }
+        }
+    ));
+
+    passport.use(new GoogleStrategy({
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/google/callback"
+    },
+        async (accessToken, refreshToken, profile, done) => {
+            try {
+                let user = await User.findOne({ where: { email: profile.emails[0].value } });
+
+                if (user) {
+                    // If exists, returns the user
+                    return done(null, user);
+                } else {
+                    // If not, we create it in the bd
+                    user = await User.create({
+                        firstname: profile.name.givenName,
+                        lastname: profile.name.familyName,
+                        email: profile.emails[0].value,
+                    });
+
+                    // Return the created user
+                    return done(null, user);
+                }
+            } catch (error) {
+                return done(error, null);
             }
         }
     ));
