@@ -9,19 +9,21 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 export default () => {
 
     //serialize 
-    passport.serializeUser(function (user, done) {
+    passport.serializeUser((user, done) => {
         done(null, user.id);
     });
 
     // deserialize user 
-    passport.deserializeUser(function (id, done) {
-        User.findByPk(id).then(function (user) {
-            if (user) {
-                done(null, user.get());
-            } else {
-                done(user.errors, null);
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const user = await User.findByPk(id);
+            if (!user) {
+                return done(new Error('User not found'), null);
             }
-        });
+            done(null, user.get());
+        } catch (error) {
+            done(error, null);
+        }
     });
 
     passport.use('local-signup', new LocalStrategy(

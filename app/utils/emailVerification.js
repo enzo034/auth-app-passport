@@ -6,7 +6,9 @@ export const sendEmailConfirmation = async (user) => {
     try {
         const recoveryToken = await createVerificationToken(user.id);
 
-        if (!recoveryToken) return false;
+        if (!recoveryToken) {
+            return false;
+        }
 
         const confirmationLink = `${CURRENT_URL}/confirmemail/${recoveryToken.dataValues.token}`;
 
@@ -15,12 +17,13 @@ export const sendEmailConfirmation = async (user) => {
             to: user.email,
             subject: `Email confirmation`,
             html: `Example mail confirmation : ${confirmationLink}`
-        }
+        };
 
         await transporter.sendMail(mailOptions);
+
         return true;
     } catch (error) {
-        console.log(error);
+        console.log("Error sending the email:", error);
         return false;
     }
-}
+};

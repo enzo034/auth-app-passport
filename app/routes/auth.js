@@ -1,4 +1,4 @@
-import { signup, signin, logout, dashboard, confirmEmail } from '../controllers/authController.js';
+import { signup, signin, logout, dashboard, confirmEmail, requestConfirmationEmail } from '../controllers/authController.js';
 import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/auth.middlewares.js';
@@ -34,5 +34,18 @@ router.get('/auth/google/callback',
     });
 
 router.get('/confirmemail/:token', confirmEmail);
+
+router.post('/requestconfirmationemail', isLoggedIn, requestConfirmationEmail);
+
+router.get('/confirmation', isLoggedIn, (req, res) => {
+    const successMessage = req.session.successMessage;
+    const errorMessage = req.session.errorMessage;
+
+    delete req.session.successMessage;
+    delete req.session.errorMessage;
+
+    res.render('confirmation', { successMessage, errorMessage });
+});
+
 
 export default router;
