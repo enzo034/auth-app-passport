@@ -2,21 +2,24 @@ import { CURRENT_URL, NM_EMAIL } from "../config/config.js";
 import { createVerificationToken } from './createAndVerifyTokens.js'
 import { transporter } from './transporterNodeMailer.js';
 
-export const sendEmailConfirmation = async (user) => {
+export const sendEmailConfirmation = async (user, tokenInfo) => {
     try {
-        const recoveryToken = await createVerificationToken(user.id);
+        const token = await createVerificationToken(user.id);
 
-        if (!recoveryToken) {
-            return false;
+        if (!token) {
+            throw new Error("Unable to create token");
         }
 
-        const confirmationLink = `${CURRENT_URL}/confirmemail/${recoveryToken.dataValues.token}`;
+        const { emailSubject, html } = tokenInfo;
+
+        // Replace {{token}} in the template
+        const htmlWithToken = html.replace('{{token}}', token.dataValues.token);
 
         const mailOptions = {
             from: NM_EMAIL,
             to: user.email,
-            subject: `Email confirmation`,
-            html: `Example mail confirmation : ${confirmationLink}`
+            subject: emailSubject,
+            html: htmlWithToken,
         };
 
         await transporter.sendMail(mailOptions);
@@ -24,6 +27,6 @@ export const sendEmailConfirmation = async (user) => {
         return true;
     } catch (error) {
         console.log("Error sending the email:", error);
-        return false;
+        throw new Error("Error sending the email");
     }
 };

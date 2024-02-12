@@ -5,6 +5,7 @@ import { isValidPassword, generateHash } from '../../utils/passport-password.js'
 import { sendEmailConfirmation } from '../../utils/emailVerification.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '../config.js';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { emailConfirmationInfo } from '../../utils/emailTemplates.js';
 
 export default () => {
 
@@ -53,9 +54,9 @@ export default () => {
                 };
                 const newUser = await User.create(data);
 
-                const success = sendEmailConfirmation(newUser);
+                await sendEmailConfirmation(newUser, emailConfirmationInfo);
 
-                if (!newUser || !success) {
+                if (!newUser) {
                     return done(null, false);
                 }
                 if (newUser) {

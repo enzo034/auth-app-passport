@@ -2,6 +2,7 @@ import { User } from "../models/User.model.js";
 import { RecoveryToken } from "../models/RecoveryToken.model.js";
 import { verifyEmailToken } from "../utils/createAndVerifyTokens.js";
 import { sendEmailConfirmation } from "../utils/emailVerification.js";
+import { emailConfirmationInfo } from "../utils/emailTemplates.js";
 
 export const signup = (req, res) => {
     res.render('signup');
@@ -47,21 +48,12 @@ export const confirmEmail = async (req, res) => {
 
 export const requestConfirmationEmail = async (req, res) => {
     try {
-        console.log("Sending confirmation email...");
-        const success = await sendEmailConfirmation(req.user);
-        
-        if (success) {
-            console.log("Confirmation email sent successfully.");
-            req.session.successMessage = "The confirmation email was sent successfully.";
-        } else {
-            console.log("Error sending confirmation email.");
-            req.session.errorMessage = "There was an error sending the confirmation email.";
-        }
-
-        console.log("Redirecting to confirmation page...");
+        await sendEmailConfirmation(req.user, emailConfirmationInfo);
+        req.session.successMessage = "The confirmation email was sent successfully.";
         res.redirect('/confirmation');
     } catch (error) {
         console.error("Error sending confirmation email:", error);
-        res.status(500).send("An error occurred on the server.");
+        req.session.errorMessage = "There was an error sending the confirmation email.";
+        res.redirect('/confirmation');
     }
 };

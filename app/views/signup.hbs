@@ -1,33 +1,47 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>Sign up layout</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
+{{> header }}
 
 <body>
-    <h2>Passport With Sequelize and MySQL</h2>
-    <form id="signup" name="signup" method="post" action="/signup">
-        <label for="email">Email Address: </label>
-        <input class="text" name="email" type="email" />
-        <label for="firstname">First Name: </label>
-        <input name="firstname" type="text" />
-        <label for="lastname">Last Name: </label>
-        <input name="lastname" type="text" />
-        <label for="password">Password: </label>
-        <input name="password" type="password" />
-        <input class="btn" type="submit" value="Sign Up" />
-    </form>
-
     <div class="container">
-    <div class="jumbotron text-center text-primary">
-        <h1><span class="fa fa-lock"></span> Social Authentication</h1>
-        <p>Login or Register with:</p>
-        <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google"></span> SignIn with Google</a>
+        <div class="jumbotron text-center text-primary">
+            <h2>Passport With Sequelize and MySQL</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <form id="signup" name="signup" method="post" action="/signup">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="email" placeholder="Email" name="email">
+                            <label for="email">Email</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="firstname" placeholder="First Name"
+                                name="firstname">
+                            <label for="firstname">First Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="lastname" placeholder="Last Name"
+                                name="lastname">
+                            <label for="lastname">Last Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="password" placeholder="Password"
+                                name="password">
+                            <label for="password">Password</label>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary mb-xl-5" type="submit">Sign Up</button>
+                        </div>
+                    </form>
+                    <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google"></span> SignIn with
+                        Google</a>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>

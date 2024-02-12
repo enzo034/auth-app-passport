@@ -28,7 +28,7 @@ app.set('views', './app/views');
 app.engine('hbs', engine({
     extname: '.hbs',
     defaultLayout: false,
-    layoutsDir: "views/layouts/"
+    layoutsDir: "views/",
 }));
 app.set('view engine', '.hbs');
 

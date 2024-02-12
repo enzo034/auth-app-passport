@@ -5,7 +5,7 @@ export const createVerificationToken = async (userId) => {
     try {
         const existingToken = await RecoveryToken.findOne({ where: { userId: userId } });
         if (existingToken) {
-            return false;
+            return new Error("There's an existing token for this account.");
         }
 
         const token = crypto.randomBytes(32).toString('hex');
@@ -20,8 +20,8 @@ export const createVerificationToken = async (userId) => {
 
         return createdToken;
     } catch (error) {
-        console.error("Error creating verification token: ", error);
-        return null;
+        console.log("Error sending the email:", error);
+        throw new Error(error.message);
     }
 };
 
