@@ -1,4 +1,4 @@
-import { signup, signin, logout, dashboard, confirmEmail, requestConfirmationEmail } from '../controllers/authController.js';
+import { signup, signin, logout, dashboard, confirmEmail, requestConfirmationEmail } from '../controllers/Auth.controller.js';
 import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/auth.middlewares.js';

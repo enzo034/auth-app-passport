@@ -4,8 +4,9 @@ import { RecoveryToken } from '../models/RecoveryToken.model.js';
 export const createVerificationToken = async (userId) => {
     try {
         const existingToken = await RecoveryToken.findOne({ where: { userId: userId } });
+
         if (existingToken) {
-            return new Error("There's an existing token for this account.");
+            throw new Error("There's an existing token for this account.");
         }
 
         const token = crypto.randomBytes(32).toString('hex');

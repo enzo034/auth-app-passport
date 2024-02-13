@@ -27,6 +27,6 @@ export const sendEmailConfirmation = async (user, tokenInfo) => {
         return true;
     } catch (error) {
         console.log("Error sending the email:", error);
-        throw new Error("Error sending the email");
+        throw new Error(error.message);
     }
 };
