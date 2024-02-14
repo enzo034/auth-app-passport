@@ -3,6 +3,7 @@ import { RecoveryToken } from "../models/RecoveryToken.model.js";
 import { verifyEmailToken } from "../utils/createAndVerifyTokens.js";
 import { sendEmailConfirmation } from "../utils/emailVerification.js";
 import { emailConfirmationInfo, passwordResetInfo } from "../utils/emailTemplates.js";
+import { generateHash } from "../utils/passport-password.js";
 
 export const signup = (req, res) => {
     res.render('signup');
@@ -13,7 +14,9 @@ export const signin = (req, res) => {
 }
 
 export const dashboard = (req, res) => {
-    res.render('dashboard');
+    const confirmed = req.user.confirmed;
+
+    res.render('dashboard', { confirmed });
 }
 
 export const logout = (req, res) => {
@@ -64,8 +67,15 @@ export const requestConfirmationEmail = async (req, res) => {
     }
 };
 
+export const renderRequestPasswordRecovery = (req, res) => {
+    res.render('requestpasswordrecovery');
+}
+
 export const requestPasswordRecovery = async (req, res) => {
     const { email } = req.body;
+
+    let errorMessage = null;
+    let successMessage = null;
 
     try {
 
@@ -76,16 +86,44 @@ export const requestPasswordRecovery = async (req, res) => {
         })
 
         if (!user) {
-            req.session.errorMessage = "There's no user with that email"
+            errorMessage = "There's no user with that email"
         } else {
             await sendEmailConfirmation(user, passwordResetInfo);
-            req.session.successMessage = "The email to recover your password was sent.";
+            successMessage = "The email to recover your password was sent.";
         }
 
-        res.redirect('/confirmation');
+        return res.render('confirmation', { successMessage, errorMessage });
     } catch (error) {
-        console.error("Error sending confirmation email:", error);
-        req.session.errorMessage = error.message;
-        res.redirect('/confirmation');
+        console.error("Error sending the email:", error);
+        errorMessage = error.message;
+        return res.render('confirmation', { successMessage, errorMessage });
+    }
+}
+
+export const renderResetPasswordPage = async (req, res) => {
+    const { token } = req.params;
+    res.render('resetpassword', { token, errorMessage: null, successMessage: null });
+};
+
+export const resetPassword = async (req, res) => {
+    const { newPassword } = req.body;
+    const { token } = req.params;
+
+    try {
+
+        const recoveryToken = await verifyEmailToken(token); //I don't check the recovery token later because of the verifyEmailToken
+        const user = await User.findByPk(recoveryToken.dataValues.userId);
+
+        const hashedPassword = generateHash(newPassword);
+
+        await user.update({ password: hashedPassword });
+
+        const successMessage = "Your password has been reset successfully.";
+
+        return res.render('confirmation', { successMessage, errorMessage: null });
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        const errorMessage = error.message || "An error occurred while resetting your password.";
+        res.render('resetpassword', { token, errorMessage, successMessage: null });
     }
 }

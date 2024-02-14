@@ -8,9 +8,11 @@
         <div class="container">
             <h2>Dashboard</h2>
             <h5>Logged!.</h5>
+            {{#unless confirmed}}
             <form action="/requestconfirmationemail" method="POST">
                 <button type="submit" class="btn btn-primary">Solicitar Confirmación de Correo Electrónico</button>
             </form>
+            {{/unless}}
             <a href="/logout">Logout</a>
         </div>
     </div>

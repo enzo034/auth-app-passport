@@ -1,4 +1,16 @@
-import { signup, signin, logout, dashboard, confirmEmail, requestConfirmationEmail } from '../controllers/Auth.controller.js';
+import {
+    signup,
+    signin,
+    logout,
+    dashboard,
+    confirmEmail,
+    requestConfirmationEmail,
+    requestPasswordRecovery,
+    resetPassword,
+    renderResetPasswordPage,
+    renderRequestPasswordRecovery
+}
+    from '../controllers/Auth.controller.js';
 import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/auth.middlewares.js';
@@ -47,5 +59,10 @@ router.get('/confirmation', isLoggedIn, (req, res) => {
     res.render('confirmation', { successMessage, errorMessage });
 });
 
+router.get('/requestpasswordrecovery', renderRequestPasswordRecovery);
+router.post('/requestpasswordrecovery', requestPasswordRecovery);
+
+router.get('/resetpassword/:token', renderResetPasswordPage);
+router.post('/resetpassword/:token', resetPassword);
 
 export default router;
