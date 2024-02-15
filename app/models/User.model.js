@@ -15,17 +15,12 @@ export const User = sequelize.define('user', {
         type: DataTypes.STRING,
         notEmpty: true
     },
-    username: {
-        type: DataTypes.TEXT
-    },
-    about: {
-        type: DataTypes.TEXT
-    },
     email: {
         type: DataTypes.STRING,
         validate: {
             isEmail: true
-        }
+        },
+        allowNull: false
     },
     password: {
         type: DataTypes.STRING,

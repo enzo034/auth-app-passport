@@ -13,7 +13,7 @@ import {
     from '../controllers/Auth.controller.js';
 import { Router } from 'express'
 import passport from 'passport';
-import { isLoggedIn } from '../middlewares/auth.middlewares.js';
+import { isLoggedIn } from '../middlewares/isLoggedIn.js';
 
 const router = Router();
 

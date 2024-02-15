@@ -34,6 +34,6 @@ export const verifyEmailToken = async (token) => {
         return emailToken;
     } else {
         // Token expired, invalid or not found
-        throw new Error("The token not found, expired or invalid.");
+        throw new Error("Token not found, expired or invalid.");
     }
 }

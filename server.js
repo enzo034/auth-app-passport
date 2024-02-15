@@ -3,9 +3,9 @@ import session from 'express-session';
 import { engine } from 'express-handlebars';
 import { User } from './app/models/User.model.js';
 import { RecoveryToken } from './app/models/RecoveryToken.model.js';
-import authRouter from './app/routes/auth.js'
+import authRouter from './app/routes/Auth.routes.js'
 import express, { urlencoded, json } from 'express';
-var app = express();
+const app = express();
 
 app.use(urlencoded({
     extended: true
