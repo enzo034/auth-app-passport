@@ -14,6 +14,7 @@ import {
 import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/isLoggedIn.js';
+import { validateDataSignup, validateDataSignin } from '../middlewares/validateData.js';
 
 const router = Router();
 
@@ -24,13 +25,13 @@ router.get('/logout', logout);
 
 router.get('/dashboard', isLoggedIn, dashboard);
 
-router.post('/signup', passport.authenticate('local-signup', {
+router.post('/signup', validateDataSignup, passport.authenticate('local-signup', {
     successRedirect: '/dashboard',
     failureRedirect: '/signup'
 }
 ));
 
-router.post('/signin', passport.authenticate('local-signin', {
+router.post('/signin', validateDataSignin, passport.authenticate('local-signin', {
     successRedirect: '/dashboard',
     failureRedirect: '/signin'
 }
