@@ -15,8 +15,13 @@ import { Router } from 'express'
 import passport from 'passport';
 import { isLoggedIn } from '../middlewares/isLoggedIn.js';
 import { validateDataSignup, validateDataSignin } from '../middlewares/validateData.js';
+import csrf from 'csurf';
 
 const router = Router();
+
+const csrfProtection = csrf({cookie: true});
+
+router.use(csrfProtection);
 
 router.get('/signup', signup);
 router.get('/signin', signin);
