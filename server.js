@@ -5,6 +5,8 @@ import { User } from './app/models/User.model.js';
 import { RecoveryToken } from './app/models/RecoveryToken.model.js';
 import authRouter from './app/routes/Auth.routes.js'
 import express, { urlencoded, json } from 'express';
+import flash from 'express-flash'
+
 const app = express();
 
 app.use(urlencoded({
@@ -20,6 +22,7 @@ app.use(session({
     saveUninitialized: true
 })); // session secret 
 
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 

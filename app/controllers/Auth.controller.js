@@ -4,6 +4,8 @@ import { verifyEmailToken } from "../utils/createAndVerifyTokens.js";
 import { sendEmailConfirmation } from "../utils/emailVerification.js";
 import { emailConfirmationInfo, passwordResetInfo } from "../utils/emailTemplates.js";
 import { generateHash } from "../utils/passport-password.js";
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode'
 
 export const signup = (req, res) => {
     res.render('signup');
@@ -23,6 +25,48 @@ export const logout = (req, res) => {
     req.session.destroy(function (err) {
         res.redirect('/');
     });
+}
+
+export const changeUserState2fa = async (req, res) => {
+    try {
+        const user = req.user;
+        
+        if (!user) {
+            return res.status(400).send('User not found');
+        }
+
+        if (user.twoFactorEnabled) {
+            user.twoFactorEnabled = false;
+            user.twoFactorSecret = null;
+        } else {
+            user.twoFactorEnabled = true;
+
+            const secret = speakeasy.generateSecret({ length: 20 });
+            const secretBase32 = secret.base32;
+
+            user.twoFactorSecret = secretBase32;
+
+            const qrCodeUrl = speakeasy.otpauthURL({
+                secret: secret.ascii,
+                label: 'Authentication test',
+                issuer: 'Authentication test'
+            });
+
+            qrcode.toDataURL(qrCodeUrl, (err, dataUrl) => {
+                if (err) {
+                    console.log('Error generating the QR: ', err);
+                } else {
+                    console.log('QR code generated: ', dataUrl);
+                }
+            });
+        }
+
+        await user.save();
+        res.redirect('/dashboard');
+    } catch (error) {
+        console.error('Error changing 2FA status:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 export const confirmEmail = async (req, res) => {

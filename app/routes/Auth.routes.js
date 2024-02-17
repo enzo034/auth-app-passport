@@ -8,7 +8,8 @@ import {
     requestPasswordRecovery,
     resetPassword,
     renderResetPasswordPage,
-    renderRequestPasswordRecovery
+    renderRequestPasswordRecovery,
+    changeUserState2fa
 }
     from '../controllers/Auth.controller.js';
 import { Router } from 'express'
@@ -19,9 +20,9 @@ import csrf from 'csurf';
 
 const router = Router();
 
-const csrfProtection = csrf({cookie: true});
+const csrfProtection = csrf({ cookie: true });
 
-router.use(csrfProtection);
+//router.use(csrfProtection);
 
 router.get('/signup', signup);
 router.get('/signin', signin);
@@ -33,14 +34,30 @@ router.get('/dashboard', isLoggedIn, dashboard);
 router.post('/signup', validateDataSignup, passport.authenticate('local-signup', {
     successRedirect: '/dashboard',
     failureRedirect: '/signup'
-}
-));
+},));
 
-router.post('/signin', validateDataSignin, passport.authenticate('local-signin', {
-    successRedirect: '/dashboard',
-    failureRedirect: '/signin'
-}
-));
+router.post('/2fa', isLoggedIn, changeUserState2fa);
+
+router.post('/signin', validateDataSignin, (req, res, next) => {
+    passport.authenticate('local-signin', (err, user, info) => {
+        if (err) { return next(err); }
+        if (!user) { return res.redirect('/signin'); }
+
+        if (req.flash('2faRequired').length > 0) {
+            return res.redirect('/verify-2fa');
+        }
+
+        req.login(user, (err) => { 
+            if (err) { return next(err); }
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
+});
+
+
+router.get('/verify-2fa', (req, res)=>{
+    res.render('verify-2fa');
+})
 
 router.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }));

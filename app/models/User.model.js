@@ -29,5 +29,12 @@ export const User = sequelize.define('user', {
     confirmed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    twoFactorEnabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    twoFactorSecret: {
+        type: DataTypes.STRING
     }
 });

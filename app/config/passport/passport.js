@@ -91,10 +91,15 @@ export default () => {
                         message: 'Incorrect password.'
                     });
                 }
-                var userinfo = user.get();
-                return done(null, userinfo);
+                
+                if (user.twoFactorEnabled) {
+                    req.flash('2faRequired', '2FA verification required');
+                    return done(null, user);
+                }
+                
+                return done(null, user.get());
             } catch (error) {
-                console.log("Error:", err);
+                console.log("Error:", error);
                 return done(null, false, {
                     message: 'Something went wrong with your Signin'
                 });
