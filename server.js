@@ -1,66 +1,35 @@
-import passport from 'passport';
-import session from 'express-session';
-import { engine } from 'express-handlebars';
+import expressApp from './app/config/expressConfig.js';
+import passportConfig from './app/config/passport/passport.js';
+import authRouter from './app/routes/Auth.routes.js'
 import { User } from './app/models/User.model.js';
 import { RecoveryToken } from './app/models/RecoveryToken.model.js';
-import authRouter from './app/routes/Auth.routes.js'
-import express, { urlencoded, json } from 'express';
-import flash from 'express-flash'
 
-const app = express();
+// Routes
+expressApp.use(authRouter);
 
-app.use(urlencoded({
-    extended: true
-})
-);
-app.use(json());
-
-// For Passport 
-app.use(session({
-    secret: 'keyboard cat',
-    resave: true,
-    saveUninitialized: true
-})); // session secret 
-
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
-
-//For Handlebars 
-app.set('views', './app/views');
-app.engine('hbs', engine({
-    extname: '.hbs',
-    defaultLayout: false,
-    layoutsDir: "views/",
-}));
-app.set('view engine', '.hbs');
-
-//Routes
-app.use(authRouter);
-
-//load passport strategies 
-import passportConfig from './app/config/passport/passport.js'
+// Passport configuration
 passportConfig();
 
-//Sync Database 
+// Sync db
 async function dbConnect() {
     try {
         await User.sync();
         await RecoveryToken.sync();
     } catch (error) {
-        console.log("Unable to connect to the db : ", error);
+        console.log("Unable to connect to the database:", error);
     }
 }
 dbConnect();
 
-app.get('/', function (req, res) {
+// Home route
+expressApp.get('/', (req, res) => {
     res.send(`Welcome to Passport with Sequelize 
-                <a href="/signup">Sign up</a>
-                <a href="/signin">Sign in</a>`);
+        <a href="/signup">Sign up</a>
+        <a href="/signin">Sign in</a>`);
 });
 
-app.listen(3000, function (err) {
-    if (!err)
-        console.log("Server listening on port 3000");
-    else console.log(err)
+// Server setup
+const PORT = 3000;
+expressApp.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });

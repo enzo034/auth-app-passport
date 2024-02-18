@@ -4,14 +4,31 @@
 {{> header}}
 
 <body>
-    <h2>2FA Verification</h2>
-    {{#if errorMessage }} 
-        <p style="color: red;">{{errorMessage}}</p>
-    {{/if}}
-    <form action="/verify-2fa" method="post">
-        <label for="code">Enter Verification Code:</label>
-        <input type="text" id="code" name="code">
-        <button type="submit">Verify</button>
-    </form>
+    <div class="container">
+        <div class="jumbotron text-center text-primary">
+            <h2>2FA Verification</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    {{#if errorMessage }}
+                    <div class="alert alert-danger" role="alert">
+                        {{errorMessage}}
+                    </div>
+                    {{/if}}
+                    <form action="/verify-2fa" method="post">
+                        <input type="hidden" name="_csrf" value="{{ csrfToken }}">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="code" placeholder="Password"
+                                name="code">
+                            <label for="code">Enter Verification Code</label>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary mb-xl-5" type="submit">Verify</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>

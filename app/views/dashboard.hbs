@@ -10,18 +10,50 @@
             <h5>Logged!.</h5>
             {{#unless confirmed}}
             <form action="/requestconfirmationemail" method="POST">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
                 <button type="submit" class="btn btn-primary">Solicitar Confirmación de Correo Electrónico</button>
             </form>
             {{/unless}}
 
             <form action="/2fa" method="post">
+                <input type="hidden" name="_csrf" value="{{ csrfToken }}">
                 <input type="hidden" name="enable2fa" value="true">
-                <button type="submit">Activar 2FA</button>
+                <button type="submit" class="btn btn-primary m-4">Activate/Deactivate 2FA</button>
             </form>
+
+            {{#if qrDisabled}}
+            <div class="alert alert-danger" role="alert" id="message2fa">
+                {{qrDisabled}}
+            </div>
+            {{/if}}
+
+            {{#if qrCodeUrl}}
+            <div id="qrCode" class="text-center">
+                <p>Be sure to use this QR code in any authenticator app of your choice.</p>
+                <img src="{{qrCodeUrl}}" alt="QR code 2fa">
+                <button class="btn btn-primary" onclick="removeQR()">Remove QR</button>
+            </div>
+            {{/if}}
 
             <a href="/logout">Logout</a>
         </div>
     </div>
+
+    <script>
+        function removeQR() {
+            const qrCode = document.getElementById('qrCode');
+            if (qrCode) {
+                qrCode.remove();
+            }
+        }
+
+        setTimeout(() => {
+            const message2fa = document.getElementById('message2fa');
+            if (message2fa) {
+                message2fa.remove();
+            }
+        }, 5000);
+    </script>
 </body>
 
 </html>

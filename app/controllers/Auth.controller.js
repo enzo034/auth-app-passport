@@ -6,19 +6,46 @@ import { emailConfirmationInfo, passwordResetInfo } from "../utils/emailTemplate
 import { generateHash } from "../utils/passport-password.js";
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode'
+import passport from 'passport';
 
 export const signup = (req, res) => {
-    res.render('signup');
+    res.render('signup', { csrfToken: req.csrfToken() });
 }
 
 export const signin = (req, res) => {
-    res.render('signin');
+    res.render('signin', { csrfToken: req.csrfToken() });
+}
+
+export const signinPost = (req, res, next) => {
+    passport.authenticate('local-signin', (err, user, info) => {
+        if (err) { return next(err); }
+        if (!user) { return res.redirect('/signin'); }
+
+        if (req.flash('2faRequired').length > 0) {
+            req.session.userId = user.id;
+            return res.redirect('/verify-2fa');
+        }
+
+        req.login(user, (err) => {
+            if (err) { return next(err); }
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
+}
+
+export const verify2fa = (req, res) => {
+    res.render('verify-2fa', { csrfToken: req.csrfToken() });
 }
 
 export const dashboard = (req, res) => {
     const confirmed = req.user.confirmed;
+    const qrCodeUrl = req.session.qrUrl;
+    const qrDisabled = req.session.qrDisabled;
 
-    res.render('dashboard', { confirmed });
+    delete req.session.qrUrl;
+    delete req.session.qrDisabled;
+
+    res.render('dashboard', { confirmed, qrCodeUrl, qrDisabled, csrfToken: req.csrfToken() });
 }
 
 export const logout = (req, res) => {
@@ -29,8 +56,9 @@ export const logout = (req, res) => {
 
 export const changeUserState2fa = async (req, res) => {
     try {
-        const user = req.user;
-        
+        const userId = req.user.id;
+        const user = await User.findByPk(userId);
+
         if (!user) {
             return res.status(400).send('User not found');
         }
@@ -38,6 +66,8 @@ export const changeUserState2fa = async (req, res) => {
         if (user.twoFactorEnabled) {
             user.twoFactorEnabled = false;
             user.twoFactorSecret = null;
+
+            req.session.qrDisabled = "You disabled 2FA. Remember that if you activate it again you will have to scan the new QR Code"
         } else {
             user.twoFactorEnabled = true;
 
@@ -56,17 +86,48 @@ export const changeUserState2fa = async (req, res) => {
                 if (err) {
                     console.log('Error generating the QR: ', err);
                 } else {
-                    console.log('QR code generated: ', dataUrl);
+                    req.session.qrUrl = dataUrl;
                 }
             });
         }
 
         await user.save();
+
         res.redirect('/dashboard');
     } catch (error) {
         console.error('Error changing 2FA status:', error);
         res.status(500).send('Internal Server Error');
     }
+}
+
+export const verify2faCode = async (req, res) => {
+    const { code } = req.body;
+    const user = await User.findByPk(req.session.userId);
+    req.session.userId = null;
+
+    if (!user || !code) {
+        req.flash('errorMessage', 'Invalid request.');
+        return res.redirect('/signin');
+    }
+
+    const verified = speakeasy.totp.verify({
+        secret: user.dataValues.twoFactorSecret,
+        encoding: 'base32',
+        token: code
+    });
+
+    if (!verified) {
+        req.flash('errorMessage', 'Invalid verification code.');
+        return res.render('verify-2fa', { errorMessage: req.flash('errorMessage'), csrfToken: req.csrfToken() });
+    }
+
+    req.login(user, (err) => {
+        if (err) {
+            console.error('Error logging in user:', err);
+            return res.redirect('/signin');
+        }
+        return res.redirect('/dashboard');
+    });
 }
 
 export const confirmEmail = async (req, res) => {
@@ -112,7 +173,7 @@ export const requestConfirmationEmail = async (req, res) => {
 };
 
 export const renderRequestPasswordRecovery = (req, res) => {
-    res.render('requestpasswordrecovery');
+    res.render('requestpasswordrecovery', { csrfToken: req.csrfToken() });
 }
 
 export const requestPasswordRecovery = async (req, res) => {
@@ -146,7 +207,7 @@ export const requestPasswordRecovery = async (req, res) => {
 
 export const renderResetPasswordPage = async (req, res) => {
     const { token } = req.params;
-    res.render('resetpassword', { token, errorMessage: null, successMessage: null });
+    res.render('resetpassword', { token, errorMessage: null, successMessage: null, csrfToken: req.csrfToken() });
 };
 
 export const resetPassword = async (req, res) => {
@@ -168,6 +229,16 @@ export const resetPassword = async (req, res) => {
     } catch (error) {
         console.error("Error resetting password:", error);
         const errorMessage = error.message || "An error occurred while resetting your password.";
-        res.render('resetpassword', { token, errorMessage, successMessage: null });
+        res.render('resetpassword', { token, errorMessage, successMessage: null, csrfToken: req.csrfToken() });
     }
+}
+
+export const confirmationController = (req, res) => {
+    const successMessage = req.session.successMessage;
+    const errorMessage = req.session.errorMessage;
+
+    delete req.session.successMessage;
+    delete req.session.errorMessage;
+
+    res.render('confirmation', { successMessage, errorMessage });
 }
