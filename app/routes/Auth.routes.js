@@ -46,14 +46,18 @@ router.get('/verify-2fa', verify2fa);
 
 router.post('/verify-2fa', verify2faCode)
 
-router.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/error' }),
-    (req, res) => {
-        res.redirect('/dashboard');
-    });
+    (req, res, next) => {
+        if (req.flash('2faRequired').length > 0) {
+            return res.redirect('/verify-2fa');
+        } else {
+            return res.redirect('/dashboard');
+        }
+    }
+);
 
 router.get('/confirmemail/:token', confirmEmail);
 

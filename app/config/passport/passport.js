@@ -110,13 +110,21 @@ export default () => {
     passport.use(new GoogleStrategy({
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/auth/google/callback"
+        callbackURL: "http://localhost:3000/auth/google/callback",
+        passReqToCallback: true
     },
-        async (accessToken, refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
             try {
                 let user = await User.findOne({ where: { email: profile.emails[0].value } });
 
                 if (user) {
+                    
+                    if (user.dataValues.twoFactorEnabled) {
+                        req.flash('2faRequired', '2FA verification required');
+                        console.log(req.sessionID);
+                        return done(null, user);
+                    }
+
                     // If exists, returns the user
                     return done(null, user);
                 } else {
@@ -127,6 +135,8 @@ export default () => {
                         email: profile.emails[0].value,
                     });
 
+                    await sendEmailConfirmation(user, emailConfirmationInfo);
+                    
                     // Return the created user
                     return done(null, user);
                 }
