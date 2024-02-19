@@ -50,10 +50,24 @@ router.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/error' }),
-    (req, res) => {
-        res.redirect('/dashboard');
-    });
+    (req, res, next) => {
+        passport.authenticate('google', (err, user, info) => {
+            if (err) { return next(err); }
+            if (!user) { return res.redirect('/error'); }
+
+            if (user.twoFactorEnabled) {
+                req.session.userId = user.id;
+                return res.redirect('/verify-2fa');
+            } else {
+                req.login(user, (err) => {
+                    if (err) { return next(err); }
+                    return res.redirect('/dashboard');
+                });
+            }
+        })(req, res, next);
+    }
+);
+
 
 router.get('/confirmemail/:token', confirmEmail);
 

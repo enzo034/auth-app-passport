@@ -104,7 +104,7 @@ export const verify2faCode = async (req, res) => {
     const { code } = req.body;
     const user = await User.findByPk(req.session.userId);
     req.session.userId = null;
-
+    
     if (!user || !code) {
         req.flash('errorMessage', 'Invalid request.');
         return res.redirect('/signin');
