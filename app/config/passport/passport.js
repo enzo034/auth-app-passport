@@ -127,6 +127,8 @@ export default () => {
                         email: profile.emails[0].value,
                     });
 
+                    await sendEmailConfirmation(user, emailConfirmationInfo);
+
                     // Return the created user
                     return done(null, user);
                 }

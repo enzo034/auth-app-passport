@@ -13,7 +13,8 @@ import {
     verify2faCode,
     confirmationController,
     verify2fa,
-    signinPost
+    signinPost,
+    googleOAuth
 }
     from '../controllers/Auth.controller.js';
 import { Router } from 'express'
@@ -37,40 +38,18 @@ router.post('/signup', validateDataSignup, passport.authenticate('local-signup',
     successRedirect: '/dashboard',
     failureRedirect: '/signup'
 },));
+router.post('/signin', validateDataSignin, signinPost);
 
 router.post('/2fa', isLoggedIn, changeUserState2fa);
 
-router.post('/signin', validateDataSignin, signinPost);
-
 router.get('/verify-2fa', verify2fa);
-
 router.post('/verify-2fa', verify2faCode)
 
-router.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-router.get('/auth/google/callback',
-    (req, res, next) => {
-        passport.authenticate('google', (err, user, info) => {
-            if (err) { return next(err); }
-            if (!user) { return res.redirect('/error'); }
-
-            if (user.twoFactorEnabled) {
-                req.session.userId = user.id;
-                return res.redirect('/verify-2fa');
-            } else {
-                req.login(user, (err) => {
-                    if (err) { return next(err); }
-                    return res.redirect('/dashboard');
-                });
-            }
-        })(req, res, next);
-    }
-);
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google/callback', googleOAuth);
 
 
 router.get('/confirmemail/:token', confirmEmail);
-
 router.post('/requestconfirmationemail', isLoggedIn, requestConfirmationEmail);
 
 router.get('/confirmation', isLoggedIn, confirmationController);

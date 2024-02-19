@@ -33,6 +33,23 @@ export const signinPost = (req, res, next) => {
     })(req, res, next);
 }
 
+export const googleOAuth = (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+        if (err) { return next(err); }
+        if (!user) { return res.redirect('/error'); }
+
+        if (user.twoFactorEnabled) {
+            req.session.userId = user.id;
+            return res.redirect('/verify-2fa');
+        } else {
+            req.login(user, (err) => {
+                if (err) { return next(err); }
+                return res.redirect('/dashboard');
+            });
+        }
+    })(req, res, next);
+}
+
 export const verify2fa = (req, res) => {
     res.render('verify-2fa', { csrfToken: req.csrfToken() });
 }
@@ -104,7 +121,7 @@ export const verify2faCode = async (req, res) => {
     const { code } = req.body;
     const user = await User.findByPk(req.session.userId);
     req.session.userId = null;
-    
+
     if (!user || !code) {
         req.flash('errorMessage', 'Invalid request.');
         return res.redirect('/signin');
