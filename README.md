@@ -1,4 +1,4 @@
-# Authentication Application Security Documentation
+# Authentication App
 
 ## Introduction
 This documentation outlines the security measures implemented in the authentication application to safeguard user data and privacy.
@@ -30,10 +30,9 @@ This documentation outlines the security measures implemented in the authenticat
 - Node.js
 - Express.js
 - MySQL
-- ORM: Sequelize
-- Helmet
+- Sequelize
 
-## Dependencies
+## Some dependencies
 - bcryptjs
 - csurf
 - express
